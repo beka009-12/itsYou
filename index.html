@@ -23,45 +23,53 @@
     border: 1px solid #334155;
     border-radius: 18px;
     padding: 28px;
-    width: 360px;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
     color: #e5e7eb;
-  }
-
-  .title {
-    font-size: 20px;
-    margin-bottom: 16px;
-    color: #a5b4fc;
-    font-weight: 600;
     text-align: center;
   }
 
+  .title {
+    font-size: 44px;
+    margin-bottom: 16px;
+    color: #a5b4fc;
+    font-weight: 600;
+  }
+
   .log {
+    text-align: start;
     background: #020617;
     border: 1px solid #1f2937;
     border-radius: 12px;
     padding: 14px;
-    height: 160px;
+    height: 260px;
     overflow-y: auto;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
+    font-size: 29px;
   }
 
   button {
     margin-top: 16px;
     width: 100%;
-    padding: 12px 0;
-    border-radius: 12px;
+    padding: 16px 0;
+    border-radius: 16px;
     border: none;
     background: #4f46e5;
     color: white;
     cursor: pointer;
-    font-size: 15px;
+    font-size: 33px;
     font-weight: 600;
-    transition: background 0.3s;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+    transition: background 0.3s, transform 0.2s;
   }
   button:hover:not(:disabled) {
     background: #6366f1;
+  }
+  button:active:not(:disabled) {
+    transform: scale(0.97);
   }
   button:disabled {
     opacity: 0.6;
@@ -86,28 +94,35 @@
   }
   .progress-label {
     margin-top: 6px;
-    font-size: 12px;
+    font-size: 26px;
     color: #9ca3af;
     text-align: right;
   }
 
+  /* результат с плавным появлением */
   .result {
-    font-size: 16px;
-    line-height: 1.6;
+    font-size: 33px;
+    line-height: 1.8;
     text-align: center;
     margin-top: 12px;
     position: relative;
     z-index: 3;
+    opacity: 0;
+    animation: fadeIn 1.5s forwards;
   }
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+
   .heart {
-    color: #fb7185;
+    color: #ff1538;
     font-weight: 700;
   }
 
   .heart-fall {
     top: 0;
     position: absolute;
-    font-size: 18px;
+    font-size: 22px;
     animation: fall-heart 5s linear infinite;
   }
   @keyframes fall-heart {
@@ -115,34 +130,12 @@
     100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
   }
 
-  /* Мобильная адаптивность только для телефонов */
-  @media screen and (max-width: 480px) {
-    .app {
-      width: 90vw;
-      padding: 20px;
-      border-radius: 14px;
-    }
-    .title {
-      font-size: 18px;
-    }
-    .log {
-      height: 140px;
-      font-size: 13px;
-      padding: 10px;
-    }
-    button {
-      font-size: 14px;
-      padding: 10px 0;
-    }
-    .progress-label {
-      font-size: 11px;
-    }
-    .result {
-      font-size: 14px;
-    }
-  }
-</style>
+  /* снежинки */
 
+
+  /* адаптивность для телефонов */
+
+</style>
 </head>
 <body>
   <div class="app">
@@ -161,8 +154,8 @@
       <button id="run">Запустить сборку</button>
     </div>
 
-    <div id="result" class="result" style="display: none;"></div>
-  
+    <div id="result" class="result"></div>
+
 <script>
   const log = document.getElementById('log');
   const btn = document.getElementById('run');
@@ -179,20 +172,42 @@
   ];
 
   const message = `
-    Люблю вас чон кыз ❤️!
+    Люблю вас, чон кыз ❤️!<br>
   `;
 
+  function append(text) {
+    const line = document.createElement('div');
+    line.textContent = text;
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
+  }
 
-  function append(text){const line=document.createElement('div');line.textContent=text;log.appendChild(line);log.scrollTop=log.scrollHeight;}
-  function setProgress(p){bar.style.width=p+'%';percent.textContent=p+'%';}
-  async function animateTo(target,duration=1000){const start=parseInt(percent.textContent)||0;const t0=performance.now();return new Promise(resolve=>{function tick(t){const k=Math.min(1,(t-t0)/duration);const v=Math.round(start+(target-start)*k);setProgress(v);if(k<1)requestAnimationFrame(tick);else resolve();}requestAnimationFrame(tick);});}
+  function setProgress(p) {
+    bar.style.width = p + "%";
+    percent.textContent = p + "%";
+  }
 
-  btn.onclick=async()=>{
-    btn.disabled=true;
+  async function animateTo(target,duration=1000){
+    const start = parseInt(percent.textContent)||0;
+    const t0 = performance.now();
+    return new Promise(resolve=>{
+      function tick(t){
+        const k=Math.min(1,(t-t0)/duration);
+        const v=Math.round(start+(target-start)*k);
+        setProgress(v);
+        if(k<1) requestAnimationFrame(tick);
+        else resolve();
+      }
+      requestAnimationFrame(tick);
+    });
+  }
+
+  btn.onclick = async () => {
+    btn.disabled = true;
     setProgress(0);
-    log.innerHTML='';
+    log.innerHTML = '';
 
-    const stepProgress=[20,45,70,90];
+    const stepProgress = [20,45,70,90];
     for(let i=0;i<steps.length;i++){
       append(steps[i]);
       await animateTo(stepProgress[i],700);
@@ -200,26 +215,25 @@
     }
     await animateTo(100,1200);
 
-    // Скрываем сборку
-    stage.style.display='none';
-    result.style.display='block';
-    result.innerHTML=message;
+    stage.style.display = 'none';
+    result.style.display = 'block';
+    result.innerHTML = message;
 
-    // запускаем дождь сердечек
-   for(let i=0;i<80;i++){
-  const h=document.createElement('div');
-  h.className='heart-fall';
-  h.textContent = "❤️"; // айфонное сердце
-  h.style.left=Math.random()*90+'vw';
-  h.style.fontSize=(14+Math.random()*12)+'px';
-  h.style.animationDuration=(3+Math.random()*3)+'s';
-  document.body.appendChild(h);
-  await new Promise(r=>setTimeout(r,100));
-   }
+    // дождь сердечек помедленнее и меньше для телефона
+    for(let i=0;i<40;i++){
+      const h = document.createElement('div');
+      h.className = 'heart-fall';
+      h.textContent = "❤️";
+      h.style.left = Math.random()*90 + 'vw';
+      h.style.fontSize = (14 + Math.random()*10) + 'px';
+      h.style.animationDuration = (4 + Math.random()*3) + 's';
+      document.body.appendChild(h);
+      await new Promise(r=>setTimeout(r,150));
+    }
+
+    // снежинки на фоне
 
   };
-
-
 </script>
 </body>
 </html>
